@@ -1,0 +1,107 @@
+/* css/style.css */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+form {
+    background-color: #1e1e1e;
+    padding: 30px 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.05);
+    width: 100%;
+    max-width: 500px;
+    box-sizing: border-box;
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #f1f1f1;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="file"],
+select {
+    width: 100%;
+    padding: 10px;
+    background-color: #2a2a2a;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 10px;
+    box-sizing: border-box;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+input:focus,
+select:focus {
+    border-color: #fdd835;
+    background-color: #333;
+    outline: none;
+}
+
+button {
+    width: 100%;
+    background-color: #fdd835; /* Yellow */
+    color: #1e1e1e;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #ffeb3b;
+}
+
+p {
+    text-align: center;
+    margin-top: 15px;
+    color: #ccc;
+}
+
+a {
+    color: #fdd835;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+#pw-error {
+    color: #ff6b6b;
+    font-size: 0.9em;
+    margin-top: 5px;
+}

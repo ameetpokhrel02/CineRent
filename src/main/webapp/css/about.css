@@ -1,0 +1,98 @@
+/* Fullscreen Hero Section */
+.full-hero-banner {
+  background-image: url('/images/about\ us.jpeg'); /* Replace with your actual image path */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-left: 5%;
+  color: rgb(10, 10, 10);
+}
+
+.hero-content {
+  max-width: 600px;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.hero-content h1 {
+  font-size: 48px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.hero-content p {
+  font-size: 20px;
+  font-weight: 400;
+  color: #ddd;
+}
+
+/* === Stats Section === */
+.stats-section {
+  padding: 60px 20px;
+  background: #fff;
+  text-align: center;
+}
+
+.stats-heading h2 {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.stats-heading p {
+  max-width: 700px;
+  margin: 0 auto 40px auto;
+  color: #555;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.stats-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+}
+
+.stats-left {
+  flex: 1 1 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  text-align: left;
+  justify-content: center;
+}
+
+.stat-block h3 {
+  font-size: 38px;
+  color: #f4b400;
+  font-weight: 700;
+  margin: 0;
+}
+
+.stat-block h3 span {
+  color: #f4b400;
+  font-weight: 400;
+  font-size: 22px;
+  margin-left: 5px;
+}
+
+.stat-block p {
+  margin-top: 4px;
+  color: #777;
+  font-size: 15px;
+}
+
+.stats-right {
+  flex: 1 1 400px;
+  text-align: center;
+}
+
+.stats-right img {
+  width: 100%;
+  max-width: 400px;
+}
