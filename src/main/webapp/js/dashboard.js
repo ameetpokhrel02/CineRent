@@ -1,28 +1,5 @@
 // Sample data
-let users = [
-    {
-        id: 1,
-        username: 'johndoe',
-        email: 'john@example.com',
-        password: 'password123',
-        firstName: 'John',
-        lastName: 'Doe',
-        phone: '555-123-4567',
-        profilePic: 'https://via.placeholder.com/150',
-        role: 'admin'
-    },
-    {
-        id: 2,
-        username: 'janedoe',
-        email: 'jane@example.com',
-        password: 'password456',
-        firstName: 'Jane',
-        lastName: 'Doe',
-        phone: '555-987-6543',
-        profilePic: 'https://via.placeholder.com/150',
-        role: 'user'
-    }
-];
+let users = [];
 
 let movies = [];
 
@@ -52,7 +29,7 @@ const movieCount = document.getElementById('movieCount');
 const activityList = document.getElementById('activityList');
 
 document.addEventListener('DOMContentLoaded', async () => {
-    renderUsers();
+    await fetchUsers(); // Fetch users from the backend
     await fetchMovies(); // Fetch movies from the backend
     updateStats();
     renderActivities();
@@ -61,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Fetch movies from the backend
 async function fetchMovies() {
     try {
-        const response = await fetch('ListMovieServlet'); // Replace with your backend endpoint
+        const response = await fetch('ListMovieServlet'); // Remove the '/CineRent/' prefix
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -75,12 +52,44 @@ async function fetchMovies() {
             price: parseFloat(movie.price),
             runtime: movie.runtime,
             youtubeLink: movie.youtubeLink,
-            overview: movie.overview || '', // Add overview field with default empty string
-            posterPath: movie.posterPath || '' // Add posterPath field with default empty string
+            overview: movie.overview || '',
+            posterPath: movie.posterPath || ''
         }));
-        renderMovies(); // Render movies after fetching
+        renderMovies();
     } catch (error) {
         console.error('Failed to fetch movies:', error);
+    }
+}
+
+// Fetch users from the backend
+async function fetchUsers() {
+    try {
+        const response = await fetch('ListUserServlet');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const text = await response.text();
+        console.log("Raw response:", text);
+        
+        // Try to parse the JSON
+        const data = JSON.parse(text);
+        
+        users = data.map(user => ({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            password: user.password,
+            firstName: user.first_name,
+            lastName: user.last_name,
+            phone: user.phone,
+            role: user.role
+        }));
+        
+        console.log("Processed users:", users);
+        renderUsers();
+    } catch (error) {
+        console.error('Failed to fetch users:', error);
     }
 }
 
@@ -172,6 +181,9 @@ function renderMovies(data = movies) {
             `<img src="${movie.posterPath}" alt="${movie.title}" style="width: 50px; height: auto;">` :
             'No poster';
 
+        // Convert price to number if it's a string
+        const price = typeof movie.price === 'string' ? parseFloat(movie.price) : movie.price;
+        
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${movie.id}</td>
@@ -179,7 +191,7 @@ function renderMovies(data = movies) {
             <td>${movie.genre}</td>
             <td>${movie.releaseYear}</td>
             <td>${movie.rating}</td>
-            <td>$${movie.price.toFixed(2)}</td>
+            <td>$${isNaN(price) ? '0.00' : price.toFixed(2)}</td>
             <td>${movie.runtime}</td>
             <td title="${movie.overview || ''}">${shortOverview}</td>
             <td>${posterPreview}</td>
@@ -207,7 +219,6 @@ function renderMovies(data = movies) {
 
 
 
-
 // Add User
 addUserBtn.addEventListener('click', () => {
     document.getElementById('userModalTitle').textContent = 'Add User';
@@ -216,12 +227,102 @@ addUserBtn.addEventListener('click', () => {
     showModal(userModal);
 });
 
-// Add Movie
+// Only ONE handler for opening the Add Movie modal
 addMovieBtn.addEventListener('click', () => {
-    document.getElementById('movieModalTitle').textContent = 'Add Movie';
-    document.getElementById('movieId').value = '';
     movieForm.reset();
+    document.getElementById('movieId').value = '';
+    document.getElementById('movieModalTitle').textContent = 'Add Movie';
     showModal(movieModal);
+});
+
+// Close modal when clicking the close button or cancel
+closeModalBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        movieModal.classList.remove('active');
+    });
+});
+cancelBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        movieModal.classList.remove('active');
+    });
+});
+
+
+// Save Movie (Add or Edit)
+movieForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const movieId = document.getElementById('movieId').value;
+    const movieData = {
+        id: movieId ? parseInt(movieId) : null,
+        title: document.getElementById('title').value,
+        genre: document.getElementById('genre').value,
+        releaseYear: parseInt(document.getElementById('releaseYear').value),
+        rating: parseFloat(document.getElementById('rating').value),
+        price: document.getElementById('price').value, // Keep as string for server
+        runtime: document.getElementById('runtime').value,
+        youtubeLink: document.getElementById('youtubeLink').value,
+        overview: document.getElementById('overview').value,
+        posterPath: document.getElementById('posterPath').value
+    };
+
+    if (movieId) {
+        // Edit existing movie
+        try {
+            const response = await fetch('UpdateMovieServlet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(movieData)
+            });
+            if (!response.ok) {
+                throw new Error('Failed to update movie');
+            }
+            // Update the movie in the local array
+            const index = movies.findIndex(m => m.id == movieId);
+            if (index !== -1) {
+                movies[index] = { ...movies[index], ...movieData };
+            }
+            renderMovies();
+            updateStats();
+            addActivity('Movie updated', movieData.title);
+            hideModal(movieModal);
+        } catch (err) {
+            alert('Error updating movie: ' + err.message);
+        }
+    } else {
+        try {
+            // Get the base URL dynamically
+            const baseUrl = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+            const response = await fetch(`${baseUrl}/AddMovieServlet`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(movieData)
+            });
+            
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Server returned non-JSON response:', text);
+                throw new Error('Server returned an invalid response format');
+            }
+            
+            const data = await response.json();
+            
+            if (!response.ok || data.error) {
+                throw new Error(data.error || 'Failed to add movie');
+            }
+            
+            movies.push(data);
+            renderMovies();
+            updateStats();
+            addActivity('Movie added', data.title);
+            hideModal(movieModal);
+        } catch (err) {
+            console.error('Error adding movie:', err);
+            alert('Error adding movie: ' + err.message);
+        }
+    }
 });
 
 // Edit User
@@ -253,7 +354,11 @@ function editMovie(id) {
         document.getElementById('genre').value = movie.genre;
         document.getElementById('releaseYear').value = movie.releaseYear;
         document.getElementById('rating').value = movie.rating;
-        document.getElementById('price').value = movie.price;
+        
+        // Handle price as string or number
+        document.getElementById('price').value = typeof movie.price === 'string' ? 
+            movie.price : movie.price.toString();
+            
         document.getElementById('runtime').value = movie.runtime;
         document.getElementById('youtubeLink').value = movie.youtubeLink;
         document.getElementById('overview').value = movie.overview || '';
@@ -264,38 +369,65 @@ function editMovie(id) {
 }
 
 // Save User
-userForm.addEventListener('submit', (e) => {
-
+userForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
     const userId = document.getElementById('userId').value;
     const userData = {
+        id: userId ? parseInt(userId) : 0,
         username: document.getElementById('username').value,
         email: document.getElementById('email').value,
         password: document.getElementById('password').value,
         firstName: document.getElementById('firstName').value,
         lastName: document.getElementById('lastName').value,
         phone: document.getElementById('phone').value,
-        profilePic: document.getElementById('profilePic').value,
         role: document.getElementById('role').value
     };
 
     if (userId) {
-        // Update existing user
-        const index = users.findIndex(u => u.id == userId);
-        if (index !== -1) {
-            users[index] = { ...users[index], ...userData };
+        // Edit existing user
+        try {
+            const response = await fetch('UpdateUserServlet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+            if (!response.ok) {
+                throw new Error('Failed to update user');
+            }
+            // Update the user in the local array
+            const index = users.findIndex(u => u.id == userId);
+            if (index !== -1) {
+                users[index] = { ...users[index], ...userData };
+            }
+            renderUsers();
+            updateStats();
             addActivity('User updated', userData.username);
+            hideModal(userModal);
+        } catch (err) {
+            alert('Error updating user: ' + err.message);
         }
     } else {
         // Add new user
-        const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
-        users.push({ id: newId, ...userData });
-        addActivity('User added', userData.username);
+        try {
+            const response = await fetch('AddUserServlet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+            if (!response.ok) {
+                throw new Error('Failed to add user');
+            }
+            const data = await response.json();
+            users.push(data);
+            renderUsers();
+            updateStats();
+            addActivity('User added', data.username);
+            hideModal(userModal);
+        } catch (err) {
+            alert('Error adding user: ' + err.message);
+        }
     }
-
-    renderUsers();
-    updateStats();
-    hideModal(userModal);
 });
 
 // Save Movie
@@ -308,8 +440,8 @@ movieForm.addEventListener('submit', async (e) => {
         genre: document.getElementById('genre').value,
         releaseYear: parseInt(document.getElementById('releaseYear').value),
         rating: parseFloat(document.getElementById('rating').value),
-        price: parseFloat(document.getElementById('price').value),
-        runtime: document.getElementById('runtime').value,
+        price: document.getElementById('price').value, // keep as string
+        runtime: document.getElementById('runtime').value, // keep as string
         youtubeLink: document.getElementById('youtubeLink').value,
         overview: document.getElementById('overview').value,
         posterPath: document.getElementById('posterPath').value
@@ -320,7 +452,44 @@ movieForm.addEventListener('submit', async (e) => {
         await editMovie(parseInt(movieId), movieData);
     } else {
         // Add new movie
-        await addMovie(movieData);
+        try {
+            console.log('Sending movie data:', JSON.stringify(movieData));
+            
+            const response = await fetch('AddMovieServlet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(movieData)
+            }).catch(error => {
+                console.error('Network error:', error);
+                throw new Error('Network error: ' + error.message);
+            });
+            
+            console.log('Response status:', response.status);
+            
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Server returned non-JSON response:', text);
+                throw new Error('Server returned an invalid response format');
+            }
+            
+            const data = await response.json();
+            console.log('Response data:', data);
+            
+            if (!response.ok || data.error) {
+                throw new Error(data.error || 'Failed to add movie');
+            }
+            
+            movies.push(data);
+            renderMovies();
+            updateStats();
+            addActivity('Movie added', data.title);
+            hideModal(movieModal);
+        } catch (err) {
+            console.error('Error adding movie:', err);
+            alert('Error adding movie: ' + err.message);
+        }
     }
 
     renderMovies();
@@ -346,17 +515,27 @@ function showDeleteConfirmation(type, id) {
 }
 
 // Confirm Delete
-confirmDeleteBtn.addEventListener('click', () => {
+confirmDeleteBtn.addEventListener('click', async () => {
     const type = confirmDeleteBtn.getAttribute('data-type');
     const id = confirmDeleteBtn.getAttribute('data-id');
 
     if (type === 'user') {
-        const index = users.findIndex(u => u.id == id);
-        if (index !== -1) {
-            const username = users[index].username;
-            users.splice(index, 1);
-            addActivity('User deleted', username);
-            renderUsers();
+        try {
+            const response = await fetch(`DeleteUserServlet?id=${id}`, {
+                method: 'POST'
+            });
+            if (!response.ok) {
+                throw new Error('Failed to delete user');
+            }
+            const index = users.findIndex(u => u.id == id);
+            if (index !== -1) {
+                const username = users[index].username;
+                users.splice(index, 1);
+                addActivity('User deleted', username);
+                renderUsers();
+            }
+        } catch (err) {
+            alert('Error deleting user: ' + err.message);
         }
     } else {
         const index = movies.findIndex(m => m.id == id);

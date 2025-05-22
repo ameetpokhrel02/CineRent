@@ -11,8 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.io.InputStream;
-
-
+import util.HashUtil;
 
 @MultipartConfig
 @WebServlet("/Register")
@@ -26,7 +25,7 @@ public class UserRegister extends HttpServlet{
 			int id = Integer.parseInt(request.getParameter("id"));
             String username = request.getParameter("username");
             String email = request.getParameter("email");
-            String Password = request.getParameter("password");
+            String Password = HashUtil.hash(request.getParameter("password"));
             String firstName = request.getParameter("first_name");
             String lastName = request.getParameter("last_name");
             int  phone = Integer.parseInt(request.getParameter("phone_number"));

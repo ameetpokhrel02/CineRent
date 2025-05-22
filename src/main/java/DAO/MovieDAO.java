@@ -27,28 +27,33 @@ public class MovieDAO {
 }
 
 
-	public boolean addMovie(Movie movie){
+public int addMovie(Movie movie) throws SQLException {
+    String sql = "INSERT INTO movie (Title, Genre, ReleaseYear, Rating, Price, Runtime, youtubeLink, overview, posterPath) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    try (PreparedStatement stmt = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        stmt.setString(1, movie.getTitle());
+        stmt.setString(2, movie.getGenre());
+        stmt.setInt(3, movie.getReleaseYear());
+        stmt.setFloat(4, movie.getRating());
+        stmt.setString(5, movie.getPrice());
+        stmt.setString(6, movie.getRuntime());
+        stmt.setString(7, movie.getYoutubeLink());
+        stmt.setString(8, movie.getOverview());
+        stmt.setString(9, movie.getPosterPath());
 
-		String sql = "INSERT INTO movie (Title, Genre, ReleaseYear, Rating, Price, Runtime, youtubeLink, overview, posterPath) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-            try(PreparedStatement stmt = connection.prepareStatement(sql)){
-            stmt.setString(1, movie.getTitle());
-            stmt.setString(2, movie.getGenre());
-            stmt.setInt(3, movie.getReleaseYear());
-            stmt.setFloat(4, movie.getRating());
-            stmt.setString(5, movie.getPrice());
-            stmt.setString(6, movie.getRuntime());
-            stmt.setString(7, movie.getYoutubeLink());
-            stmt.setString(8, movie.getOverview());
-            stmt.setString(9, movie.getPosterPath());
-
-            int rowsInserted = stmt.executeUpdate();
-            return rowsInserted > 0;
-
-            }catch(Exception e){
-        		e.printStackTrace();
-        		return false;}
-        				}
+        int rowsInserted = stmt.executeUpdate();
+        if (rowsInserted > 0) {
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
+            }
+        }
+        return -1;
+    } catch (Exception e) {
+        e.printStackTrace();
+        return -1;
+    }
+}
 
 
 

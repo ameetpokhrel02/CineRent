@@ -17,13 +17,13 @@
   <body>
     <nav class="navbar">
       <div class="container">
-        <a href="index.html" class="logo">
+        <a href="home.jsp" class="logo">
           <span class="logo-crimson">Crimson</span>
           <span class="logo-cinema">Cinema</span>
         </a>
         
         <div class="nav-links" id="navLinks">
-          <a href="index.html" class="nav-link">Home</a>
+          <a href="home.jsp" class="nav-link">Home</a>
           <a href="#" class="nav-link">Movies</a>
           <a href="#" class="nav-link">TV Shows</a>
           <a href="#" class="nav-link">Categories</a>
@@ -83,6 +83,7 @@
     </footer>
 
     <script src="js/home.js"></script>
+    
   </body>
 </html>
     

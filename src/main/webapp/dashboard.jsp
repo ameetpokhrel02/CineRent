@@ -193,6 +193,8 @@
         </div>
     </div>
 
+
+<!--   movie modal-->
     <div class="modal" id="movieModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -200,7 +202,7 @@
                 <span class="close-modal">&times;</span>
             </div>
             <div class="modal-body">
-                <form id="movieForm" action="MovieServlet" method="post" >
+                <form id="movieForm" >
                     <input type="hidden" id="movieId" name="movieId">
 
                     <div class="form-group">

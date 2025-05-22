@@ -1,6 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
     
+<%
+// Check if user is logged in
+User currentUser = (User) session.getAttribute("user");
+if (currentUser != null) {
+    System.out.println("Home.jsp: User is logged in - " + currentUser.getUsername() + ", Role: " + currentUser.getRole());
+} else {
+    System.out.println("Home.jsp: No user logged in");
+}
+%>
+    
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -10,10 +20,6 @@
     <meta name="description" content="Watch the latest movies and TV shows online with Crimson Cinema" />
     <meta name="author" content="Crimson Cinema" />
 
-    <meta property="og:title" content="Crimson Cinema - Watch Movies Online" />
-    <meta property="og:description" content="Watch the latest movies and TV shows online with Crimson Cinema" />
-    <meta property="og:type" content="website" />
-    
     <link rel="stylesheet" href="css/home.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   </head>
@@ -21,7 +27,7 @@
   <body>
     <nav class="navbar">
       <div class="container">
-        <a href="index.html" class="logo">
+        <a href="home.jsp" class="logo">
           <span class="logo-crimson">Crimson</span>
           <span class="logo-cinema">Cinema</span>
         </a>
@@ -41,7 +47,15 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
           </button>
         </div>
-          <div class="nav-actions">
+        
+        <div class="cart-icon">
+          <a href="cart.jsp" title="View Cart">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <span id="cart-count" class="cart-count">0</span>
+          </a>
+        </div>
+        
+        <div class="nav-actions">
     <button class="btn login-btn" onclick="location.href='login.jsp'" >Login</button>
     <button class="btn signup-btn" onclick="location.href='register.jsp'">Sign Up</button>
   </div>
@@ -100,7 +114,6 @@
           <p class="section-subtitle">Movies with the highest ratings from our users</p>
         </div>
         <div class="movie-grid" id="topRated">
-          <!-- Will be filled by JavaScript -->
         </div>
       </section>
     </main>

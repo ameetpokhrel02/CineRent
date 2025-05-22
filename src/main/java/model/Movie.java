@@ -1,99 +1,85 @@
 package model;
 
-
 public class Movie {
-
 	private int ID;
-	private String Title;
-	private String Genre;
-	private int ReleaseYear;
-	private float Rating;
-	private String Price;
-	private String Runtime;
+	private String title;
+	private String genre;
+	private int releaseYear;
+	private float rating;
+	private String price;
+	private String runtime;
 	private String youtubeLink;
 	private String overview;
 	private String posterPath;
-
-	public Movie(String title, String genre, int releaseYear, float rating, String price, String runtime, String youtubeLink) {
-		super();
-		this.Title = title;
-		this.Genre = genre;
-		this.ReleaseYear = releaseYear;
-		this.Rating = rating;
-		this.Price = price;
-		this.Runtime = runtime;
-		this.youtubeLink = youtubeLink;
-		this.overview = "";
-		this.posterPath = "";
+	
+	// Default constructor for Gson deserialization
+	public Movie() {
 	}
-
-	public Movie(String title, String genre, int releaseYear, float rating, String price, String runtime, String youtubeLink, String overview, String posterPath) {
-		super();
-		this.Title = title;
-		this.Genre = genre;
-		this.ReleaseYear = releaseYear;
-		this.Rating = rating;
-		this.Price = price;
-		this.Runtime = runtime;
+	
+	public Movie(String title, String genre, int releaseYear, float rating, String price, String runtime, String youtubeLink) {
+		this.title = title;
+		this.genre = genre;
+		this.releaseYear = releaseYear;
+		this.rating = rating;
+		this.price = price;
+		this.runtime = runtime;
 		this.youtubeLink = youtubeLink;
-		this.overview = overview;
-		this.posterPath = posterPath;
 	}
 
 	public int getID() {
 		return ID;
 	}
 
-	public void setID(int iD) {
-		ID = iD;
+	public void setID(int ID) {
+		this.ID = ID;
 	}
 
 	public String getTitle() {
-		return Title;
+		return title;
 	}
 
 	public void setTitle(String title) {
-		Title = title;
+		this.title = title;
 	}
 
 	public String getGenre() {
-		return Genre;
+		return genre;
 	}
 
 	public void setGenre(String genre) {
-		Genre = genre;
+		this.genre = genre;
 	}
 
 	public int getReleaseYear() {
-		return ReleaseYear;
+		return releaseYear;
 	}
 
 	public void setReleaseYear(int releaseYear) {
-		ReleaseYear = releaseYear;
+		this.releaseYear = releaseYear;
 	}
 
 	public float getRating() {
-		return Rating;
+		return rating;
 	}
 
 	public void setRating(float rating) {
-		Rating = rating;
+		this.rating = rating;
 	}
 
 	public String getPrice() {
-		return Price;
+		return price;
 	}
 
 	public void setPrice(String price) {
-		Price = price;
+		this.price = price;
 	}
 
 	public String getRuntime() {
-		return Runtime;
+		return runtime;
 	}
 
 	public void setRuntime(String runtime) {
-		Runtime = runtime;
+		this.runtime = runtime;
 	}
 
 	public String getYoutubeLink() {

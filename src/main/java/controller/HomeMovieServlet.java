@@ -22,46 +22,32 @@ public class HomeMovieServlet extends HttpServlet {
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        PrintWriter out = response.getWriter();
 
-        try {
-            MovieDAO dao = new MovieDAO();
-            List<Movie> movies = dao.getallMovies();
+        MovieDAO dao = new MovieDAO();
+        List<Movie> movies = dao.getallMovies();
 
-            System.out.println("[HomeMovieServlet] Retrieved " + movies.size() + " movies from DAO.");
+        System.out.println("[HomeMovieServlet] Retrieved " + movies.size() + " movies from DAO.");
 
-            if (movies.isEmpty()) {
-                System.out.println("[HomeMovieServlet] No movies found in database.");
-                response.setStatus(404); // Not Found
-                out.print("{\"error\": \"No movies found in database. Please add some movies first.\", \"code\": 404}");
-                out.flush();
-                return;
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+
+        for (int i = 0; i < movies.size(); i++) {
+            Movie movie = movies.get(i);
+
+            // Convert genre string to array (assuming genres are comma-separated)
+            String[] genresArray = movie.getGenre().split(",\\s*");
+
+            // Convert release year to date format (YYYY-MM-DD)
+            String releaseDate = movie.getReleaseYear() + "-01-01";
+
+            // Get runtime as integer (assuming runtime is stored as "X min" or just "X")
+            String runtimeStr = movie.getRuntime().replaceAll("[^0-9]", "");
+            int runtime = 120; // Default runtime if parsing fails
+            try {
+                runtime = Integer.parseInt(runtimeStr);
+            } catch (NumberFormatException e) {
+                System.out.println("[HomeMovieServlet] Could not parse runtime: " + movie.getRuntime());
             }
-
-            StringBuilder sb = new StringBuilder();
-            sb.append("[");
-
-            for (int i = 0; i < movies.size(); i++) {
-                Movie movie = movies.get(i);
-
-                // Convert genre string to array (assuming genres are comma-separated)
-                String[] genresArray = movie.getGenre() != null ?
-                    movie.getGenre().split(",\\s*") :
-                    new String[]{"Drama"};
-
-                // Convert release year to date format (YYYY-MM-DD)
-                String releaseDate = movie.getReleaseYear() + "-01-01";
-
-                // Get runtime as integer (assuming runtime is stored as "X min" or just "X")
-                String runtimeStr = movie.getRuntime() != null ?
-                    movie.getRuntime().replaceAll("[^0-9]", "") :
-                    "120";
-                int runtime = 120; // Default runtime if parsing fails
-                try {
-                    runtime = Integer.parseInt(runtimeStr);
-                } catch (NumberFormatException e) {
-                    System.out.println("[HomeMovieServlet] Could not parse runtime: " + movie.getRuntime());
-                }
 
             // Get poster path from database or use default
             String posterPath = movie.getPosterPath();
@@ -128,26 +114,19 @@ public class HomeMovieServlet extends HttpServlet {
             }
         }
 
-            sb.append("]");
-            String jsonOutput = sb.toString();
+        sb.append("]");
+        String jsonOutput = sb.toString();
 
-            System.out.println("[HomeMovieServlet] Final JSON output (truncated):");
-            if (jsonOutput.length() > 200) {
-                System.out.println(jsonOutput.substring(0, 200) + "...");
-            } else {
-                System.out.println(jsonOutput);
-            }
-
-            out.print(jsonOutput);
-            out.flush();
-        } catch (Exception e) {
-            System.err.println("[HomeMovieServlet] Error: " + e.getMessage());
-            e.printStackTrace();
-
-            response.setStatus(500); // Internal Server Error
-            out.print("{\"error\": \"" + escapeJson(e.getMessage()) + "\", \"code\": 500}");
-            out.flush();
+        System.out.println("[HomeMovieServlet] Final JSON output (truncated):");
+        if (jsonOutput.length() > 200) {
+            System.out.println(jsonOutput.substring(0, 200) + "...");
+        } else {
+            System.out.println(jsonOutput);
         }
+
+        PrintWriter out = response.getWriter();
+        out.print(jsonOutput);
+        out.flush();
     }
 
     private String escapeJson(String value) {

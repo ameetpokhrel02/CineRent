@@ -1,10 +1,28 @@
 // Will be populated from the server
 let movies = [];
 
+// Update cart count
+async function updateCartCount() {
+  try {
+    const response = await fetch('CartServlet');
+    const cartItems = await response.json();
+    
+    const cartCountElement = document.getElementById('cart-count');
+    if (cartCountElement) {
+      cartCountElement.textContent = cartItems.length;
+    }
+  } catch (error) {
+    console.error('Error updating cart count:', error);
+  }
+}
+
 // DOM Elements
 document.addEventListener('DOMContentLoaded', () => {
   // Set current year in footer
   document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+  // Update cart count
+  updateCartCount();
 
   // Check if we're on the home page or movie details page
   const isMovieDetails = window.location.pathname.includes('movie-details.jsp');
@@ -19,40 +37,21 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Home Page Functions
+
 async function loadHomePage() {
   try {
     // Fetch movies from the server
     const response = await fetch('HomeMovieServlet');
-
     if (!response.ok) {
-      let errorMessage = `HTTP error! status: ${response.status}`;
-
-      // Try to parse error message from response
-      try {
-        const errorData = await response.json();
-        if (errorData.error) {
-          errorMessage = errorData.error;
-        }
-      } catch (parseError) {
-        console.error('Could not parse error response:', parseError);
-      }
-
-      throw new Error(errorMessage);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
-
-    // Check if the response is an error object
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    movies = data;
+    movies = await response.json();
     console.log('Loaded movies from server:', movies.length);
 
     if (movies.length === 0) {
       console.error('No movies returned from server');
-      throw new Error('No movies available. Please add some movies first.');
+      return;
     }
 
     // Render hero slider (using first 5 movies from the array)
@@ -73,10 +72,6 @@ async function loadHomePage() {
           <h2>Error Loading Movies</h2>
           <p>Sorry, we couldn't load the movies. Please try again later.</p>
           <p>Error details: ${error.message}</p>
-          <div class="error-actions">
-            <a href="diagnostic" class="btn btn-primary">Run Diagnostics</a>
-            <a href="sample-data" class="btn btn-secondary">Add Sample Movies</a>
-          </div>
         </div>
       `;
     }
@@ -202,7 +197,7 @@ async function loadMovieDetails() {
   const movieId = parseInt(urlParams.get('id'));
 
   if (!movieId) {
-    window.location.href = 'index.html';
+    window.location.href = 'home.jsp';
     return;
   }
 
@@ -219,7 +214,7 @@ async function loadMovieDetails() {
     const movie = movies.find(m => m.id === movieId);
 
     if (!movie) {
-      window.location.href = 'index.html';
+      window.location.href = 'home.jsp';
       return;
     }
 
@@ -269,10 +264,6 @@ async function loadMovieDetails() {
               </div>
 			  <button id="buyButton" class="btn btn-buy">Buy for $9.99</button>
             </div>
-			<div class="Buy Now">
-
-          </div>
-
 		  </div>
 
           <div>
@@ -304,21 +295,41 @@ async function loadMovieDetails() {
     </div>
   `;
 
-  const buyBtn = document.getElementById('buyButton');
-  if (buyBtn) {
-    buyBtn.addEventListener('click', () => {
-      window.location.href = `movie${movie.id}.html`;
-    });
-  } else {
-    console.warn('Buy button not found in DOM');
-  }
+const buyBtn = document.getElementById('buyButton');
+if (buyBtn) {
+  buyBtn.addEventListener('click', async (event) => {
+    event.preventDefault(); 
+    try {
+      const response = await fetch('AddToCartServlet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ movieId: movie.id })
+      });
 
+      if (response.ok) {
+        alert('Movie added to cart!');
+        updateCartCount(); // Update the cart count
+        const viewCart = confirm('View cart now?');
+        if (viewCart) {
+          window.location.href = 'cart.jsp';
+        }
+      } else {
+        alert('Failed to add movie to cart');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred');
+    }
+  });
+} else {
+  console.warn('Buy button not found in DOM');
+}
 
   // Render recommended movies (similar genres)
   const recommendedMovies = movies
     .filter(m => m.id !== movieId && m.genres.some(genre => movie.genres.includes(genre)))
     .slice(0, 5);
-
+  
   const recommendedContainer = document.getElementById('recommendedMovies');
   recommendedMovies.forEach(movie => {
     const movieCard = createMovieCard(movie);
