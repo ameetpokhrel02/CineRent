@@ -27,7 +27,7 @@ public class AddMovieServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         
         try {
-            // Read the request body
+            // Read the request body parts
             StringBuilder buffer = new StringBuilder();
             BufferedReader reader = request.getReader();
             String line;
