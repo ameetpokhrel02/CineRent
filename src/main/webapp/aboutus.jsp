@@ -222,7 +222,7 @@
   </div>
 </section>
 
-<!-- Stats Section -->
+<!-- Stats Section for about page-->
 <section class="stats-section">
   <div class="stats-heading">
     <h2>We’re fans at heart.</h2>
