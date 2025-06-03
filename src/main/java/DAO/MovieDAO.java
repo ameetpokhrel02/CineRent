@@ -15,7 +15,7 @@ public class MovieDAO {
 	public MovieDAO() {
 	try {
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		// ya db ko naam milaunu parne
+		// make correction in db name here
 		connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/cinerent?useSSL=false", "root", "");
 
 
